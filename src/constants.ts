@@ -1,0 +1,2 @@
+export const ACL_PERMISSION_GRANTED = 1;
+export const ACL_PERMISSION_DENIED = 0;
