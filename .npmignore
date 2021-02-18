@@ -1,3 +1,8 @@
 src/
 .prettierrc
 tsconfig.json
+.eslintignore
+.eslintrc.js
+jest.config.js
+coverage
+.github/

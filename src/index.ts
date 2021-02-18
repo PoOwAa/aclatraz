@@ -1,2 +1,2 @@
-export * from './SimpleAcl';
+export * from './Aclatraz';
 export * from './constants';

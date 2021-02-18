@@ -3,7 +3,7 @@ import { AclConfig } from './interface/aclConfig.interface';
 import { ACL_PERMISSION_GRANTED } from './constants';
 import { AclRuleTemplate } from './interface/aclRuleTemplate.interface';
 
-export class SimpleAcl {
+export class Aclatraz {
   protected rules: AclRule[] = [
     {
       id: 1,

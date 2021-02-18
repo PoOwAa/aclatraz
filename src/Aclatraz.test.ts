@@ -1,26 +1,26 @@
-import { SimpleAcl } from './SimpleAcl';
+import { Aclatraz } from './Aclatraz';
 
 describe('ACL class test', () => {
   test('Create ACL instance without parameter', () => {
-    const acl = new SimpleAcl();
+    const acl = new Aclatraz();
 
-    expect(acl).toBeInstanceOf(SimpleAcl);
+    expect(acl).toBeInstanceOf(Aclatraz);
   });
 
   test('Create ACL without config', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
-    expect(acl).toBeInstanceOf(SimpleAcl);
+    expect(acl).toBeInstanceOf(Aclatraz);
   });
 
   test('Create ACL with custom config', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }], { chunkSize: 16 });
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }], { chunkSize: 16 });
 
-    expect(acl).toBeInstanceOf(SimpleAcl);
+    expect(acl).toBeInstanceOf(Aclatraz);
   });
 
   test('Get rules', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
@@ -30,7 +30,7 @@ describe('ACL class test', () => {
   });
 
   test('Add rule', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.addRule({ id: 2, slug: 'secondRule' });
     const rules = acl.getRules();
@@ -43,7 +43,7 @@ describe('ACL class test', () => {
   });
 
   test('Should throw error when adding duplicated ID', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     expect(() => {
       acl.addRule({ id: 1, slug: 'secondRule' });
@@ -51,7 +51,7 @@ describe('ACL class test', () => {
   });
 
   test('Update a rule by ID', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.setRule(1, { name: 'Test Name' });
     const rules = acl.getRules();
@@ -63,7 +63,7 @@ describe('ACL class test', () => {
   });
 
   test('Try to set new ID', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.setRule(1, { id: 2, name: 'Test Name' });
     const rules = acl.getRules();
@@ -73,7 +73,7 @@ describe('ACL class test', () => {
   });
 
   test('Delete a rule by ID', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.delRule(1);
 
@@ -82,7 +82,7 @@ describe('ACL class test', () => {
   });
 
   test('change config', () => {
-    const acl = new SimpleAcl();
+    const acl = new Aclatraz();
 
     const spy = jest.spyOn(acl, 'setOptions');
     acl.setOptions({ chunkSize: 16 });
@@ -90,7 +90,7 @@ describe('ACL class test', () => {
   });
 
   test('verify the user permission for given rule', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     expect(acl.verify('00000001', 1)).toBe(true); // Permission with padding
     expect(acl.verify('11111111', 1)).toBe(true); // Superuser
@@ -101,8 +101,8 @@ describe('ACL class test', () => {
     expect(acl.verify('1', 15312)).toBe(false); // Too big ruleId
   });
 
-  test('generate SimpleAcl permission code', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+  test('generate Aclatraz permission code', () => {
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
@@ -113,7 +113,7 @@ describe('ACL class test', () => {
   });
 
   test('should be skipped wrong ruleId at generation', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
@@ -124,7 +124,7 @@ describe('ACL class test', () => {
   });
 
   test('should generate a rule template JSON', () => {
-    const acl = new SimpleAcl([{ id: 1, slug: 'testRule' }]);
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
     acl.addRule({ id: 2, slug: 'secondRule', name: 'Second Rule' });
     const template = acl.generateRuleTemplate();

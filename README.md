@@ -1,26 +1,26 @@
-# Simple-acl
+# Aclatraz
 
 Simple dependency-free package for ACL. It can handle hundreds of roles easily.
 
 ## Install
 
-`npm install simple-acl`
+`npm install aclatraz`
 
 ## How it works
 
 1. Create the rules (they can be roles as well)
-2. Load them into SimpleAcl
+2. Load them into Aclatraz
 3. Generate permission tokens based on rules
 4. Verify token
 
 ### TypeScript example
 
 ```typescript
-import { SimpleAcl } from 'simple-acl';
+import { Aclatraz } from 'aclatraz';
 
 // Create an ACL instance. Don't forget to store
 // somewhere the rules (preferably in DB, or in a file)
-const acl = new SimpleAcl([
+const acl = new Aclatraz([
   {
     id: 1,
     slug: 'READ_USER',

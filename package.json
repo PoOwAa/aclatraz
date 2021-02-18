@@ -1,5 +1,5 @@
 {
-  "name": "simple-acl",
+  "name": "aclatraz",
   "version": "0.0.1",
   "description": "Simple dependency-free package for ACL. It can handle hundreds of roles easily.",
   "main": "lib/index.js",
@@ -11,8 +11,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PoOwAa/simple-acl.git"
+    "url": "git+https://github.com/PoOwAa/aclatraz.git"
   },
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE.md"
+  ],
   "keywords": [
     "ACL",
     "Grant",
@@ -24,9 +29,9 @@
   "author": "Raymund Ács <raycsucsu@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/PoOwAa/simple-acl/issues"
+    "url": "https://github.com/PoOwAa/aclatraz/issues"
   },
-  "homepage": "https://github.com/PoOwAa/simple-acl#readme",
+  "homepage": "https://github.com/PoOwAa/aclatraz#readme",
   "devDependencies": {
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.29",
