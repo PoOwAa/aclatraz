@@ -1,4 +1,4 @@
-# Aclatraz
+# Aclatraz [![Build Status](https://travis-ci.com/PoOwAa/aclatraz.svg?branch=main)](https://travis-ci.com/PoOwAa/aclatraz)
 
 Simple dependency-free package for ACL. It can handle hundreds of roles easily.
 
