@@ -4,28 +4,7 @@ import { ACL_PERMISSION_GRANTED } from './constants';
 import { AclRuleTemplate } from './interface/aclRuleTemplate.interface';
 
 export class Aclatraz {
-  protected rules: AclRule[] = [
-    {
-      id: 1,
-      name: 'Login',
-      slug: 'login',
-    },
-    {
-      id: 2,
-      name: 'Billing',
-      slug: 'billing',
-    },
-    {
-      id: 16,
-      name: 'test',
-      slug: 'test',
-    },
-    {
-      id: 1000,
-      name: 'test2',
-      slug: 'test2',
-    },
-  ];
+  protected rules: AclRule[];
 
   protected defaultConfig: AclConfig = {
     chunkSize: 32,

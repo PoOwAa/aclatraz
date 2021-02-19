@@ -62,6 +62,14 @@ describe('ACL class test', () => {
     expect(rules[0].name).toBe('Test Name');
   });
 
+  test('should not update a not existing rule', () => {
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
+
+    acl.setRule(2, { name: 'Not exists' });
+    const rules = acl.getRules();
+    expect(rules).toHaveLength(1);
+  });
+
   test('Try to set new ID', () => {
     const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
@@ -79,6 +87,14 @@ describe('ACL class test', () => {
 
     const rules = acl.getRules();
     expect(rules).toHaveLength(0);
+  });
+
+  test('Should not delete not existing ID', () => {
+    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
+
+    acl.delRule(12531);
+    const rules = acl.getRules();
+    expect(rules).toHaveLength(1);
   });
 
   test('change config', () => {
@@ -104,8 +120,8 @@ describe('ACL class test', () => {
   test('generate Aclatraz permission code', () => {
     const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
 
-    acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
+    acl.addRule({ id: 3, slug: 'another' });
 
     const permission = acl.generateAclCode([1, 3, 6]);
 
