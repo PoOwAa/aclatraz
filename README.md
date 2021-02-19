@@ -1,4 +1,9 @@
-# Aclatraz [![Build Status](https://travis-ci.com/PoOwAa/aclatraz.svg?branch=main)](https://travis-ci.com/PoOwAa/aclatraz)
+# Aclatraz
+
+![Travis (.com)](https://img.shields.io/travis/com/PoOwAa/aclatraz?logo=travis)
+![Codecov](https://img.shields.io/codecov/c/github/PoOwAa/aclatraz?label=codecov&logo=codecov)
+![npm](https://img.shields.io/npm/v/aclatraz?logo=javascript)
+![npm bundle size](https://img.shields.io/bundlephobia/min/aclatraz?logo=npm)
 
 Simple dependency-free package for ACL. It can handle hundreds of roles easily.
 
