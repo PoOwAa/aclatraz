@@ -1,4 +1,4 @@
-# Aclatraz
+# Aclatraz ![GitHub package.json dynamic](https://img.shields.io/github/package-json/keywords/PoOwAa/aclatraz)
 
 ![Travis (.com)](https://img.shields.io/travis/com/PoOwAa/aclatraz?logo=travis)
 ![Codecov](https://img.shields.io/codecov/c/github/PoOwAa/aclatraz?label=codecov&logo=codecov)
