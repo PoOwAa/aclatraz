@@ -1,7 +1,5 @@
 # Compiled NPM module
 lib
-# npm ignores it, so doesn't make sense to version it
-package-lock.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,code,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,code,node
