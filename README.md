@@ -180,7 +180,94 @@ app.listen(3000, () => {
 
 ### How to use as a fastify middleware
 
-_Soon..._
+```js
+import jwt from 'jsonwebtoken';
+import fastify from 'fastify';
+import { Aclatraz } from 'aclatraz';
+
+const app = fastify({
+  logger: true,
+});
+
+// Create the Aclatraz instance. Store the rules in redis/database etc.
+export const acl = new Aclatraz([
+  {
+    id: 1,
+    slug: 'ADMIN',
+  },
+  {
+    id: 2,
+    slug: 'USER',
+  },
+  {
+    id: 3,
+    slug: 'READ_OTHER_USERS',
+  },
+  {
+    id: 4,
+    slug: 'CREATE_USER',
+  },
+]);
+
+// Create a guard which takes the permission from JWT
+function permissionGuard(...permissionList) {
+  return (request, reply, done) => {
+    // Get the authorization header
+    const { authorization } = request.headers;
+
+    if (!authorization) {
+      return reply.status(401).send('Unauthorized');
+    }
+
+    // Get the token from the Bearer token
+    const [_, token] = authorization.split(' ');
+
+    // Decode the token
+    const user = jwt.decode(token, 'JWTSECRET');
+
+    // The Aclatraz permission token stored under user.permission in this example
+    const permission = user.permission;
+
+    // Check if the user permission matches any of the rules
+    let permissionGranted = false;
+    for (const ruleId of permissionList) {
+      if (acl.verify(permission, ruleId)) {
+        permissionGranted = true;
+        break;
+      }
+    }
+
+    // No match, then forbidden
+    if (!permissionGranted) {
+      return res.status(403).send({
+        status: 'error',
+        message: 'No permission granted for this endpoint',
+      });
+    }
+
+    // There is a match, we can let the user in
+    done();
+  };
+}
+
+// Actual endpoint. The second parameter is our guard as a middleware using onRequest hook, where we can define the rules by their ID
+app.get(
+  '/guardedEndpoint',
+  {
+    onRequest: permissionGuard(1, 2),
+  },
+  (request, reply) => {
+    reply.send('Nice! You have permission to see this!');
+  }
+);
+
+app.listen(3000, (err) => {
+  if (err) {
+    app.log.error(err);
+    process.exit(1);
+  }
+});
+```
 
 <a name="nestjsGuard"></a>
 
