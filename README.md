@@ -67,6 +67,7 @@ const acl = new Aclatraz([
   {
     id: 2,
     slug: 'SUPERADMIN',
+    name: 'Glorious superadmin rule',
   },
 ]);
 
@@ -74,7 +75,7 @@ const acl = new Aclatraz([
 acl.addRule({
   id: 3,
   slug: 'CREATE_USER',
-  name: 'Protect registration with this rule',
+  name: 'Protect user creation with this rule',
 });
 
 // User with this token can access id: 1 rule
