@@ -77,10 +77,10 @@ export class Aclatraz {
         // console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
         continue;
       }
-      binary[binary.length - ruleId] |= ACL_PERMISSION_GRANTED;
+      binary[index] = ACL_PERMISSION_GRANTED;
     }
 
-    return this.encode(binary.join(''), this.options.chunkSize);
+    return this.encode(binary.reverse().join(''), this.options.chunkSize);
   }
 
   public generateRuleTemplate(): string {
@@ -97,30 +97,33 @@ export class Aclatraz {
     return JSON.stringify(res);
   }
 
-  public addPermission(currentPermission: string, ruleList: number[]): string {
-    const decoded = this.decode(currentPermission);
+  public grantPermission(
+    currentPermission: string,
+    ruleList: number[]
+  ): string {
+    const decoded: string = this.decode(currentPermission);
+    const maxAclIndex: number = this.getMaxAclId();
     const reversed = decoded
       .split('')
       .reverse()
       .map((c: string) => +c);
 
+    let binary: number[] = new Array(maxAclIndex).fill(0);
+
+    reversed.forEach((c: number, index: number) => (binary[index] = c));
+
     for (const ruleId of ruleList) {
-      if (ruleId > this.getMaxAclId()) {
-        console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
+      if (ruleId > maxAclIndex) {
         continue;
       }
 
       const index = this.rules.findIndex((rule: AclRule) => rule.id === ruleId);
       if (index < 0) {
-        console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
         continue;
       }
-      console.debug(reversed);
-      console.debug(`Rule [${ruleId}] current value: [${reversed[index]}]`);
-      reversed[index] = ACL_PERMISSION_GRANTED;
-      console.debug(reversed);
+      binary[index] = ACL_PERMISSION_GRANTED;
     }
-    return this.encode(reversed.reverse().join(''), this.options.chunkSize);
+    return this.encode(binary.reverse().join(''), this.options.chunkSize);
   }
 
   public revokePermission(
@@ -153,7 +156,6 @@ export class Aclatraz {
    * separator
    */
   protected encode(aclBinary: string, chunkSize: number): string {
-    console.debug('aclBinary', aclBinary);
     const aclArr = aclBinary.split('').map((b) => +b);
 
     const chunks: string[] = [];
@@ -170,6 +172,11 @@ export class Aclatraz {
   }
 
   protected decode(permission: string): string {
+    if (!permission && permission.length < 1) {
+      return parseInt('0', this.options.encoding)
+        .toString(2)
+        .padStart(this.options.padding, this.options.paddingChar);
+    }
     const chunks = permission.split('-');
 
     let res = '';

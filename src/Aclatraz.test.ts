@@ -98,6 +98,7 @@ describe('Aclatraz method tests', () => {
     expect(acl.verify('00000001', 1)).toBe(true); // Permission with padding
     expect(acl.verify('11111111', 1)).toBe(true); // Superuser
     expect(acl.verify('1', 1)).toBe(true); // Permission without padding
+    expect(acl.verify('0004', 3)).toBe(true); // Permission madness
     expect(acl.verify('00000000', 1)).toBe(false); // No permission with padding
     expect(acl.verify('0', 1)).toBe(false); // No permission
     expect(acl.verify('0000', 1)).toBe(false); // No permission
@@ -112,7 +113,15 @@ describe('Aclatraz method tests', () => {
 
     const permission = acl.generateAclCode([1, 3, 6]);
 
-    expect(permission).toBe('00000025');
+    expect(permission).toBe('00000007');
+  });
+
+  test('generate empty permission code', () => {
+    expect(acl.generateAclCode([])).toBe('00000000');
+  });
+
+  test('grant empty permission', () => {
+    expect(acl.grantPermission('', [])).toBe('00000000');
   });
 
   test('should be skipped wrong ruleId at generation', () => {
@@ -121,7 +130,7 @@ describe('Aclatraz method tests', () => {
 
     const permission = acl.generateAclCode([1, 3, 6, 100, 4]);
 
-    expect(permission).toBe('00000025');
+    expect(permission).toBe('00000007');
   });
 
   test('should generate a rule template JSON', () => {
@@ -133,22 +142,33 @@ describe('Aclatraz method tests', () => {
     );
   });
 
-  test('should add permission', () => {
-    let newPermission = acl.addPermission('00000000', [1]);
+  test('should grant permission', () => {
+    let newPermission = acl.grantPermission('00000000', [1]);
     expect(newPermission).toBe('00000001');
     acl.addRule({ id: 2, slug: 'another' });
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 4, slug: 'another' });
     acl.addRule({ id: 5, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
-    newPermission = acl.addPermission(newPermission, [3, 6]);
+    newPermission = acl.grantPermission(newPermission, [3, 6]);
     expect(newPermission).toBe('00000025');
   });
 
-  test('should add permission when not autoincrement the rules', () => {
+  test('should grant permission when not rules are not autoincremented', () => {
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
-    const newPermission = acl.addPermission('', [1, 3, 6]);
+    const newPermission = acl.grantPermission('', [1, 3, 6]);
+    expect(newPermission).toBe('00000007');
+  });
+
+  test('should skip wrong ID at granting permission', () => {
+    let newPermission = acl.grantPermission('', [1, 3, 6]);
+    expect(newPermission).toBe('00000001');
+
+    acl.addRule({ id: 3, slug: 'another' });
+    acl.addRule({ id: 6, slug: 'sixth' });
+
+    newPermission = acl.grantPermission(newPermission, [1, 3, 6, 100, 4]);
     expect(newPermission).toBe('00000007');
   });
 
@@ -158,11 +178,20 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 6, slug: 'sixth' });
     expect(newPermission).toBe('00000000');
 
-    newPermission = acl.addPermission('', [1, 3, 6]);
+    newPermission = acl.grantPermission('', [1, 3, 6]);
     expect(newPermission).toBe('00000007');
     newPermission = acl.revokePermission(newPermission, [1]);
     expect(newPermission).toBe('00000006');
     newPermission = acl.revokePermission(newPermission, [3]);
     expect(newPermission).toBe('00000004');
+  });
+
+  test('should skip wrong ID at revoking permission', () => {
+    acl.addRule({ id: 3, slug: 'another' });
+    acl.addRule({ id: 6, slug: 'sixth' });
+    let newPermission = acl.grantPermission('', [1, 3, 6]);
+
+    newPermission = acl.revokePermission(newPermission, [1, 100, 4]);
+    expect(newPermission).toBe('00000006');
   });
 });
