@@ -114,7 +114,7 @@ app.post(
         .send({ status: 'error', message: `Permission list is not provided!` });
     }
 
-    const permissionToken = acl.generateAclCode(permissionList);
+    const permissionToken = acl.grantPermission(permissionList);
 
     MockUser.setPermission(id, permissionToken);
 
