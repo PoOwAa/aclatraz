@@ -1,11 +1,20 @@
 # Aclatraz ![GitHub package.json dynamic](https://img.shields.io/github/package-json/keywords/PoOwAa/aclatraz)
 
-![Travis (.com)](https://img.shields.io/travis/com/PoOwAa/aclatraz?logo=travis)
+![example branch parameter](https://github.com/PoOwAa/aclatraz/actions/workflows/test.yml/badge.svg?branch=main)
 ![Codecov](https://img.shields.io/codecov/c/github/PoOwAa/aclatraz?label=codecov&logo=codecov)
 ![npm](https://img.shields.io/npm/v/aclatraz?logo=javascript)
 ![npm bundle size](https://img.shields.io/bundlephobia/min/aclatraz?logo=npm)
 
 Simple dependency-free package for ACL. It can handle hundreds of roles easily.
+
+## Features
+
+- dependency-free
+- built-in TypeScript support
+- can manipulate rules on the fly
+- the generated permission token can be saved on client side (for example in JWT token) to avoid database queries to verify permission
+- you can use as middleware in express/fastify/NestJS
+- unit tests, 100% coverage
 
 ## Install
 
@@ -18,7 +27,30 @@ Simple dependency-free package for ACL. It can handle hundreds of roles easily.
 3. Generate permission tokens based on rules
 4. Verify token
 
-### TypeScript example
+## Documentation
+
+- [Examples](#Examples)
+  - [TypeScript example](#tsExample)
+  - [Express middleware](#expressMiddleware)
+  - [Fastify middleware](#fastifyMiddleware)
+  - [NestJS guard](#nestjsGuard)
+- [Interfaces](#interfaces)
+- [Methods](#Methods)
+  - [create new Instance](#constructor)
+  - [addRule](#addRule)
+  - [setRule](#setRule)
+  - [delRule](#delRule)
+  - [setOptions](#setOptions)
+  - [getRules](#getRules)
+  - [verify](#verify)
+  - [generateAclCode](#generateAclCode)
+  - [generateRuleTemplate](#generateRuleTemplate)
+  - [grantPermission](#grantPermission)
+  - [revokePermission](#revokePermission)
+
+## Examples
+
+### TypeScript example <a name="tsExample"></a>
 
 ```typescript
 import { Aclatraz } from 'aclatraz';
@@ -59,7 +91,7 @@ console.log(acl.verify(permissionToken, 1)); // true
 console.log(acl.verify(permissionToken, 2)); // false
 ```
 
-### How to use as an express middleware
+### How to use as an express middleware (here is a more detailed [example](examples/express-middleware/README.md)) <a name="expressMiddleware"></a>
 
 ```js
 import jwt from 'jsonwebtoken';
@@ -136,10 +168,105 @@ app.listen(3000, () => {
 });
 ```
 
-### How to use as a fastify middleware
+### How to use as a fastify middleware <a name="fastifyMiddleware"></a>
 
 _Soon..._
 
-### How to use as a NestJS guard
+### How to use as a NestJS guard <a name="nestjsGuard"></a>
 
 _Soon..._
+
+## Interfaces
+
+```typescript
+interface AclRule {
+  id: number;
+  name?: string;
+  slug: string;
+}
+
+interface AclConfig {
+  chunkSize: number;
+  encoding: number;
+  padding: number;
+  paddingChar: string;
+}
+
+interface AclRuleTemplate {
+  [key: number]: {
+    slug: string;
+    name?: string;
+  };
+}
+```
+
+## Methods
+
+### `constructor(aclRules?: AclRule[], options?: Partial<AclConfig>)` <a name="constructor"></a>
+
+Create a new Aclatraz instance.
+
+**Arguments**
+
+```js
+  aclRules {AclRule[]} the starting rules
+  options {AclConfig} config ACL
+```
+
+---
+
+### `addRule(aclRule: AclRule): void;` <a name="addRule"></a>
+
+Add a rule.
+
+---
+
+### `setRule(id: number, aclRule: Partial<AclRule>): void;` <a name="setRule"></a>
+
+Update a rule by its ID.
+
+---
+
+### `delRule(id: number): void;` <a name="delRule"></a>
+
+Delete a rule.
+
+---
+
+### `setOptions(aclConfig: Partial<AclConfig>): void;` <a name="setOptions"></a>
+
+Update the Aclatraz options.
+
+---
+
+### `getRules(): AclRule[];` <a name="getRules"></a>
+
+List the rules.
+
+---
+
+### `verify(permission: string, ruleId: number): boolean;` <a name="verify"></a>
+
+Check if the given permission token has access to the rule.
+
+### `generateAclCode(ruleIdList: number[]): string;` <a name="generateAclCode"></a>
+
+Generate the permission token from the given rules.
+
+---
+
+### `generateRuleTemplate(): string;` <a name="generateRuleTemplate"></a>
+
+Soon...
+
+---
+
+### `grantPermission(currentPermission: string, ruleList: number[]): string;` <a name="grantpermission"></a>
+
+Grant permission to an existing token. You can use this to create a new one, give empty string as currentPermission.
+
+---
+
+### `revokePermission(currentPermission: string, ruleList: number[]): string;` <a name="revokePermission"></a>
+
+Revoke permission from an existing token.

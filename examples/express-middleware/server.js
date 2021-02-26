@@ -67,23 +67,27 @@ app.get('/user/me', authGuard, (req, res) => {
   res.send(me);
 });
 
-app.get('/user/:id', authGuard, (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (!id) {
-    return res
-      .status(400)
-      .send({ status: 'error', message: 'No valid id provided!' });
-  }
-  const user = MockUser.findById(id);
+app.get(
+  '/user/:id',
+  [authGuard, permissionGuard(Permission.ADMIN, Permission.READ_OTHER_USERS)],
+  (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    if (!id) {
+      return res
+        .status(400)
+        .send({ status: 'error', message: 'No valid id provided!' });
+    }
+    const user = MockUser.findById(id);
 
-  if (!user) {
-    return res
-      .status(404)
-      .send({ status: 'error', message: 'User not found!' });
-  }
+    if (!user) {
+      return res
+        .status(404)
+        .send({ status: 'error', message: 'User not found!' });
+    }
 
-  res.send(user);
-});
+    res.send(user);
+  }
+);
 
 app.post(
   '/admin/user/:id/permission/add',
