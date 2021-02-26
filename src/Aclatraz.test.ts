@@ -114,6 +114,8 @@ describe('ACL class test', () => {
     expect(acl.verify('00000000', 1)).toBe(false); // No permission with padding
     expect(acl.verify('0', 1)).toBe(false); // No permission
     expect(acl.verify('0000', 1)).toBe(false); // No permission
+    expect(acl.verify('0010', 1)).toBe(false); // No permission
+    expect(acl.verify('0004', 2)).toBe(false); // No permission
     expect(acl.verify('1', 15312)).toBe(false); // Too big ruleId
   });
 
