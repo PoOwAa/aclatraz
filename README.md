@@ -72,7 +72,7 @@ const acl = new Aclatraz([
 
 // Add new rule on the fly
 acl.addRule({
-  id: 2,
+  id: 3,
   slug: 'CREATE_USER',
   name: 'Protect registration with this rule',
 });
@@ -81,16 +81,19 @@ acl.addRule({
 let permissionToken = acl.generateAclCode([1]);
 console.log(acl.verify(permissionToken, 1)); // true
 console.log(acl.verify(permissionToken, 2)); // false
+console.log(acl.verify(permissionToken, 3)); // false
 
 // Grant superadmin permission to the user
-permissionToken = acl.grantPermission(permissionToken, [2]);
+permissionToken = acl.grantPermission(permissionToken, [2, 3]);
 console.log(acl.verify(permissionToken, 1)); // true
 console.log(acl.verify(permissionToken, 2)); // true
+console.log(acl.verify(permissionToken, 3)); // true
 
 // Revoke the superadmin permission
 permissionToken = acl.revokePermission(permissionToken, [2]);
 console.log(acl.verify(permissionToken, 1)); // true
 console.log(acl.verify(permissionToken, 2)); // false
+console.log(acl.verify(permissionToken, 3)); // true
 ```
 
 <a name="expressMiddleware"></a>
