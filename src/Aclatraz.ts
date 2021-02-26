@@ -1,6 +1,6 @@
 import { AclRule } from './interface/aclRule.interface';
 import { AclConfig } from './interface/aclConfig.interface';
-import { ACL_PERMISSION_GRANTED } from './constants';
+import { ACL_PERMISSION_GRANTED, ACL_PERMISSION_DENIED } from './constants';
 import { AclRuleTemplate } from './interface/aclRuleTemplate.interface';
 
 export class Aclatraz {
@@ -97,12 +97,63 @@ export class Aclatraz {
     return JSON.stringify(res);
   }
 
+  public addPermission(currentPermission: string, ruleList: number[]): string {
+    const decoded = this.decode(currentPermission);
+    const reversed = decoded
+      .split('')
+      .reverse()
+      .map((c: string) => +c);
+
+    for (const ruleId of ruleList) {
+      if (ruleId > this.getMaxAclId()) {
+        console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
+        continue;
+      }
+
+      const index = this.rules.findIndex((rule: AclRule) => rule.id === ruleId);
+      if (index < 0) {
+        console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
+        continue;
+      }
+      console.debug(reversed);
+      console.debug(`Rule [${ruleId}] current value: [${reversed[index]}]`);
+      reversed[index] = ACL_PERMISSION_GRANTED;
+      console.debug(reversed);
+    }
+    return this.encode(reversed.reverse().join(''), this.options.chunkSize);
+  }
+
+  public revokePermission(
+    currentPermission: string,
+    ruleList: number[]
+  ): string {
+    const decoded = this.decode(currentPermission);
+    const reversed = decoded
+      .split('')
+      .reverse()
+      .map((c: string) => +c);
+
+    for (const ruleId of ruleList) {
+      if (ruleId > this.getMaxAclId()) {
+        continue;
+      }
+
+      const index = this.rules.findIndex((rule: AclRule) => rule.id === ruleId);
+      if (index < 0) {
+        continue;
+      }
+      reversed[index] = ACL_PERMISSION_DENIED;
+    }
+    return this.encode(reversed.reverse().join(''), this.options.chunkSize);
+  }
+
   /**
    * Split the binary into chunkSize pieces then convert
    * the chunks to hex codes. Finally join them with a
    * separator
    */
   protected encode(aclBinary: string, chunkSize: number): string {
+    console.debug('aclBinary', aclBinary);
     const aclArr = aclBinary.split('').map((b) => +b);
 
     const chunks: string[] = [];

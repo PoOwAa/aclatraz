@@ -18,10 +18,15 @@ describe('ACL class test', () => {
 
     expect(acl).toBeInstanceOf(Aclatraz);
   });
+});
+
+describe('Aclatraz method tests', () => {
+  let acl: Aclatraz;
+  beforeEach(() => {
+    acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
+  });
 
   test('Get rules', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
     expect(rules[0]).toHaveProperty('id');
@@ -30,8 +35,6 @@ describe('ACL class test', () => {
   });
 
   test('Add rule', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.addRule({ id: 2, slug: 'secondRule' });
     const rules = acl.getRules();
 
@@ -43,16 +46,12 @@ describe('ACL class test', () => {
   });
 
   test('Should throw error when adding duplicated ID', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     expect(() => {
       acl.addRule({ id: 1, slug: 'secondRule' });
     }).toThrow();
   });
 
   test('Update a rule by ID', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.setRule(1, { name: 'Test Name' });
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
@@ -63,16 +62,12 @@ describe('ACL class test', () => {
   });
 
   test('should not update a not existing rule', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.setRule(2, { name: 'Not exists' });
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
   });
 
   test('Try to set new ID', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.setRule(1, { id: 2, name: 'Test Name' });
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
@@ -81,8 +76,6 @@ describe('ACL class test', () => {
   });
 
   test('Delete a rule by ID', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.delRule(1);
 
     const rules = acl.getRules();
@@ -90,24 +83,18 @@ describe('ACL class test', () => {
   });
 
   test('Should not delete not existing ID', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.delRule(12531);
     const rules = acl.getRules();
     expect(rules).toHaveLength(1);
   });
 
   test('change config', () => {
-    const acl = new Aclatraz();
-
     const spy = jest.spyOn(acl, 'setOptions');
     acl.setOptions({ chunkSize: 16 });
     expect(spy).toHaveBeenCalled();
   });
 
   test('verify the user permission for given rule', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     expect(acl.verify('00000001', 1)).toBe(true); // Permission with padding
     expect(acl.verify('11111111', 1)).toBe(true); // Superuser
     expect(acl.verify('1', 1)).toBe(true); // Permission without padding
@@ -120,8 +107,6 @@ describe('ACL class test', () => {
   });
 
   test('generate Aclatraz permission code', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.addRule({ id: 6, slug: 'sixth' });
     acl.addRule({ id: 3, slug: 'another' });
 
@@ -131,8 +116,6 @@ describe('ACL class test', () => {
   });
 
   test('should be skipped wrong ruleId at generation', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
 
@@ -142,13 +125,44 @@ describe('ACL class test', () => {
   });
 
   test('should generate a rule template JSON', () => {
-    const acl = new Aclatraz([{ id: 1, slug: 'testRule' }]);
-
     acl.addRule({ id: 2, slug: 'secondRule', name: 'Second Rule' });
     const template = acl.generateRuleTemplate();
     expect(typeof template).toBe('string');
     expect(template).toBe(
       '{"1":{"slug":"testRule"},"2":{"slug":"secondRule","name":"Second Rule"}}'
     );
+  });
+
+  test('should add permission', () => {
+    let newPermission = acl.addPermission('00000000', [1]);
+    expect(newPermission).toBe('00000001');
+    acl.addRule({ id: 2, slug: 'another' });
+    acl.addRule({ id: 3, slug: 'another' });
+    acl.addRule({ id: 4, slug: 'another' });
+    acl.addRule({ id: 5, slug: 'another' });
+    acl.addRule({ id: 6, slug: 'sixth' });
+    newPermission = acl.addPermission(newPermission, [3, 6]);
+    expect(newPermission).toBe('00000025');
+  });
+
+  test('should add permission when not autoincrement the rules', () => {
+    acl.addRule({ id: 3, slug: 'another' });
+    acl.addRule({ id: 6, slug: 'sixth' });
+    const newPermission = acl.addPermission('', [1, 3, 6]);
+    expect(newPermission).toBe('00000007');
+  });
+
+  test('should revoke permission', () => {
+    let newPermission = acl.revokePermission('00000001', [1]);
+    acl.addRule({ id: 3, slug: 'another' });
+    acl.addRule({ id: 6, slug: 'sixth' });
+    expect(newPermission).toBe('00000000');
+
+    newPermission = acl.addPermission('', [1, 3, 6]);
+    expect(newPermission).toBe('00000007');
+    newPermission = acl.revokePermission(newPermission, [1]);
+    expect(newPermission).toBe('00000006');
+    newPermission = acl.revokePermission(newPermission, [3]);
+    expect(newPermission).toBe('00000004');
   });
 });
