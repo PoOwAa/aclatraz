@@ -50,7 +50,9 @@ Simple dependency-free package for ACL. It can handle hundreds of roles easily.
 
 ## Examples
 
-### TypeScript example <a name="tsExample"></a>
+<a name="tsExample"></a>
+
+### TypeScript example
 
 ```typescript
 import { Aclatraz } from 'aclatraz';
@@ -91,7 +93,9 @@ console.log(acl.verify(permissionToken, 1)); // true
 console.log(acl.verify(permissionToken, 2)); // false
 ```
 
-### How to use as an express middleware (here is a more detailed [example](examples/express-middleware/README.md)) <a name="expressMiddleware"></a>
+<a name="expressMiddleware"></a>
+
+### How to use as an express middleware (here is a more detailed [example](examples/express-middleware/README.md))
 
 ```js
 import jwt from 'jsonwebtoken';
@@ -168,11 +172,15 @@ app.listen(3000, () => {
 });
 ```
 
-### How to use as a fastify middleware <a name="fastifyMiddleware"></a>
+<a name="fastifyMiddleware"></a>
+
+### How to use as a fastify middleware
 
 _Soon..._
 
-### How to use as a NestJS guard <a name="nestjsGuard"></a>
+<a name="nestjsGuard"></a>
+
+### How to use as a NestJS guard
 
 _Soon..._
 
@@ -202,71 +210,88 @@ interface AclRuleTemplate {
 
 ## Methods
 
-### `constructor(aclRules?: AclRule[], options?: Partial<AclConfig>)` <a name="constructor"></a>
+<a name="constructor"></a>
+
+### `constructor(aclRules?: AclRule[], options?: Partial<AclConfig>)`
 
 Create a new Aclatraz instance.
 
-**Arguments**
-
-```js
-  aclRules {AclRule[]} the starting rules
-  options {AclConfig} config ACL
-```
-
 ---
 
-### `addRule(aclRule: AclRule): void;` <a name="addRule"></a>
+<a name="addRule"></a>
+
+### `addRule(aclRule: AclRule): void;`
 
 Add a rule.
 
 ---
 
-### `setRule(id: number, aclRule: Partial<AclRule>): void;` <a name="setRule"></a>
+<a name="setRule"></a>
+
+### `setRule(id: number, aclRule: Partial<AclRule>): void;`
 
 Update a rule by its ID.
 
 ---
 
-### `delRule(id: number): void;` <a name="delRule"></a>
+<a name="delRule"></a>
+
+### `delRule(id: number): void;`
 
 Delete a rule.
 
 ---
 
-### `setOptions(aclConfig: Partial<AclConfig>): void;` <a name="setOptions"></a>
+<a name="setOptions"></a>
+
+### `setOptions(aclConfig: Partial<AclConfig>): void;`
 
 Update the Aclatraz options.
 
 ---
 
-### `getRules(): AclRule[];` <a name="getRules"></a>
+<a name="getRules"></a>
+
+### `getRules(): AclRule[];`
 
 List the rules.
 
 ---
 
-### `verify(permission: string, ruleId: number): boolean;` <a name="verify"></a>
+<a name="verify"></a>
+
+### `verify(permission: string, ruleId: number): boolean;`
 
 Check if the given permission token has access to the rule.
 
-### `generateAclCode(ruleIdList: number[]): string;` <a name="generateAclCode"></a>
+---
+
+<a name="generateAclCode"></a>
+
+### `generateAclCode(ruleIdList: number[]): string;`
 
 Generate the permission token from the given rules.
 
 ---
 
-### `generateRuleTemplate(): string;` <a name="generateRuleTemplate"></a>
+<a name="generateRuleTemplate"></a>
+
+### `generateRuleTemplate(): string;`
 
 Soon...
 
 ---
 
-### `grantPermission(currentPermission: string, ruleList: number[]): string;` <a name="grantpermission"></a>
+<a name="grantpermission"></a>
+
+### `grantPermission(currentPermission: string, ruleList: number[]): string;`
 
 Grant permission to an existing token. You can use this to create a new one, give empty string as currentPermission.
 
 ---
 
-### `revokePermission(currentPermission: string, ruleList: number[]): string;` <a name="revokePermission"></a>
+<a name="revokePermission"></a>
+
+### `revokePermission(currentPermission: string, ruleList: number[]): string;`
 
 Revoke permission from an existing token.
