@@ -1,6 +1,6 @@
 import { Aclatraz } from 'aclatraz';
 
-export default new Aclatraz([
+export const acl = new Aclatraz([
   {
     id: 1,
     slug: 'ADMIN',

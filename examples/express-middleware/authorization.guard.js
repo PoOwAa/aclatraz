@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from './config.js';
-import acl from './acl.js';
+import { acl } from './acl.js';
 
 export function authGuard(req, res, next) {
   const { authorization } = req.headers;
@@ -24,7 +24,6 @@ export function authGuard(req, res, next) {
   }
 
   req.user = user;
-  console.log(req.user);
   next();
 }
 

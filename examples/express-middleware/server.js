@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import MockUser from './mockUsers.js';
 import jwt from 'jsonwebtoken';
 import config from './config.js';
-import acl from './acl.js';
+import { acl } from './acl.js';
 import { authGuard, permissionGuard } from './authorization.guard.js';
 import { Permission } from './permission.enum.js';
 
@@ -114,12 +114,15 @@ app.post(
         .send({ status: 'error', message: `Permission list is not provided!` });
     }
 
-    const permissionToken = acl.grantPermission(permissionList);
+    const permissionToken = acl.grantPermission(
+      user.permission,
+      permissionList
+    );
 
     MockUser.setPermission(id, permissionToken);
 
     res.send({
-      message: `New permissions are set to [${id}]`,
+      message: `New permissions are set to user [${id}]`,
       permissionToken,
     });
   }
