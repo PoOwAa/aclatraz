@@ -3,6 +3,6 @@ src/
 tsconfig.json
 .eslintignore
 .eslintrc.js
-jest.config.js
+jest.config.ts
 coverage
 .github/
