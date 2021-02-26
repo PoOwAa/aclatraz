@@ -118,10 +118,12 @@ describe('Aclatraz method tests', () => {
 
   test('generate empty permission code', () => {
     expect(acl.generateAclCode([])).toBe('00000000');
+    expect(acl.generateAclCode([1])).toBe('00000001');
   });
 
   test('grant empty permission', () => {
     expect(acl.grantPermission('', [])).toBe('00000000');
+    expect(acl.grantPermission('', [1])).toBe('00000001');
   });
 
   test('should be skipped wrong ruleId at generation', () => {
