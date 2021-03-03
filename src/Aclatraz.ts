@@ -77,7 +77,7 @@ export class Aclatraz {
         // console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
         continue;
       }
-      binary[index] = ACL_PERMISSION_GRANTED;
+      binary[ruleId - 1] = ACL_PERMISSION_GRANTED;
     }
 
     return this.encode(binary.reverse().join(''), this.options.chunkSize);
@@ -121,7 +121,7 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      binary[index] = ACL_PERMISSION_GRANTED;
+      binary[ruleId - 1] = ACL_PERMISSION_GRANTED;
     }
     return this.encode(binary.reverse().join(''), this.options.chunkSize);
   }
@@ -145,7 +145,7 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      reversed[index] = ACL_PERMISSION_DENIED;
+      reversed[ruleId - 1] = ACL_PERMISSION_DENIED;
     }
     return this.encode(reversed.reverse().join(''), this.options.chunkSize);
   }
