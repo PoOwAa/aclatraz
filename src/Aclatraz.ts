@@ -183,7 +183,7 @@ export class Aclatraz {
     for (const chunk of chunks) {
       res += parseInt(chunk, this.options.encoding)
         .toString(2)
-        .padStart(this.options.padding, this.options.paddingChar);
+        .padStart(this.options.chunkSize, this.options.paddingChar);
     }
 
     return res;

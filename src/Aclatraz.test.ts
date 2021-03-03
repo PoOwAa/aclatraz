@@ -120,9 +120,19 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 111, slug: 'a' });
     acl.addRule({ id: 212, slug: 'b' });
 
-    const permissionToken = acl.generateAclCode([111, 212]);
+    let permissionToken = acl.generateAclCode([212]);
+    expect(permissionToken).toBe(
+      '00080000-00000000-00000000-00000000-00000000-00000000-00000000'
+    );
+
+    permissionToken = acl.grantPermission(permissionToken, [111]);
     expect(permissionToken).toBe(
       '00080000-00000000-00000000-00004000-00000000-00000000-00000000'
+    );
+
+    permissionToken = acl.grantPermission(permissionToken, [1]);
+    expect(permissionToken).toBe(
+      '00080000-00000000-00000000-00004000-00000000-00000000-00000001'
     );
   });
 
