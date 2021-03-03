@@ -120,9 +120,10 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 111, slug: 'a' });
     acl.addRule({ id: 212, slug: 'b' });
 
-    const permission = acl.generateAclCode([111, 212]);
-
-    expect(permission).toBe('0');
+    const permissionToken = acl.generateAclCode([111, 212]);
+    expect(permissionToken).toBe(
+      '00080000-00000000-00000000-00004000-00000000-00000000-00000000'
+    );
   });
 
   test('generate empty permission code', () => {
