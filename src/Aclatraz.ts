@@ -64,23 +64,7 @@ export class Aclatraz {
   }
 
   public generateAclCode(ruleIdList: number[]): string {
-    const maxAclIndex: number = this.getMaxAclId();
-    const binary: number[] = new Array(maxAclIndex).fill(0);
-
-    for (const ruleId of ruleIdList) {
-      if (ruleId > maxAclIndex) {
-        // console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
-        continue;
-      }
-      const index = this.rules.findIndex((rule: AclRule) => rule.id === ruleId);
-      if (index < 0) {
-        // console.debug(`Invalid ruleId: [${ruleId}]. Skipping...`);
-        continue;
-      }
-      binary[ruleId - 1] = ACL_PERMISSION_GRANTED;
-    }
-
-    return this.encode(binary.reverse().join(''), this.options.chunkSize);
+    return this.grantPermission('', ruleIdList);
   }
 
   public generateRuleTemplate(): string {
