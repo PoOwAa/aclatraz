@@ -111,9 +111,18 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 6, slug: 'sixth' });
     acl.addRule({ id: 3, slug: 'another' });
 
-    const permission = acl.generateAclCode([1, 3, 6]);
+    const permission = acl.generateAclCode([1, 3, 6]); // 0b100101 --> 0x25
 
-    expect(permission).toBe('00000007');
+    expect(permission).toBe('00000025');
+  });
+
+  test('generate Aclatraz permission code (big ids)', () => {
+    acl.addRule({ id: 111, slug: 'a' });
+    acl.addRule({ id: 212, slug: 'b' });
+
+    const permission = acl.generateAclCode([111, 212]);
+
+    expect(permission).toBe('0');
   });
 
   test('generate empty permission code', () => {
@@ -130,9 +139,9 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
 
-    const permission = acl.generateAclCode([1, 3, 6, 100, 4]);
+    const permission = acl.generateAclCode([1, 3, 6, 100, 4]); // 0b100101 --> 0x25
 
-    expect(permission).toBe('00000007');
+    expect(permission).toBe('00000025');
   });
 
   test('should generate a rule template JSON', () => {
@@ -160,7 +169,7 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 3, slug: 'another' });
     acl.addRule({ id: 6, slug: 'sixth' });
     const newPermission = acl.grantPermission('', [1, 3, 6]);
-    expect(newPermission).toBe('00000007');
+    expect(newPermission).toBe('00000025');
   });
 
   test('should skip wrong ID at granting permission', () => {
@@ -171,7 +180,7 @@ describe('Aclatraz method tests', () => {
     acl.addRule({ id: 6, slug: 'sixth' });
 
     newPermission = acl.grantPermission(newPermission, [1, 3, 6, 100, 4]);
-    expect(newPermission).toBe('00000007');
+    expect(newPermission).toBe('00000025');
   });
 
   test('should revoke permission', () => {
@@ -181,11 +190,11 @@ describe('Aclatraz method tests', () => {
     expect(newPermission).toBe('00000000');
 
     newPermission = acl.grantPermission('', [1, 3, 6]);
-    expect(newPermission).toBe('00000007');
+    expect(newPermission).toBe('00000025');
     newPermission = acl.revokePermission(newPermission, [1]);
-    expect(newPermission).toBe('00000006');
+    expect(newPermission).toBe('00000024');
     newPermission = acl.revokePermission(newPermission, [3]);
-    expect(newPermission).toBe('00000004');
+    expect(newPermission).toBe('00000020');
   });
 
   test('should skip wrong ID at revoking permission', () => {
@@ -194,6 +203,6 @@ describe('Aclatraz method tests', () => {
     let newPermission = acl.grantPermission('', [1, 3, 6]);
 
     newPermission = acl.revokePermission(newPermission, [1, 100, 4]);
-    expect(newPermission).toBe('00000006');
+    expect(newPermission).toBe('00000024');
   });
 });
