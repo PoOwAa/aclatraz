@@ -217,18 +217,24 @@ describe('Aclatraz method tests', () => {
     expect(newPermission).toBe('00000024');
   });
 
-  test('random test', () => {
+  test('random ruleset encode/decode integration', () => {
     const ruleIds = [
       1, 3, 6, 18, 19, 22, 25, 34, 67, 77, 82, 96, 97, 98, 99, 128, 156, 213,
     ];
     const testAcl = new Aclatraz();
-
     for (const rule of ruleIds) {
       testAcl.addRule({ id: rule, slug: `test-${rule}` });
     }
-
     const permission = testAcl.generateAclCode(ruleIds);
+    // Verify the permission string is not empty
+    expect(permission.length).toBeGreaterThan(0);
 
-    console.log(permission);
+    // Verify each rule ID is correctly set in the permission
+    for (const ruleId of ruleIds) {
+      expect(testAcl.verify(permission, ruleId)).toBe(true);
+    }
+
+    // Verify a non-existent rule is not in the permission
+    expect(testAcl.verify(permission, 999)).toBe(false);
   });
 });
