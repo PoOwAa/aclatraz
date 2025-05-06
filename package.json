@@ -3,6 +3,9 @@
   "version": "0.1.4",
   "description": "Simple dependency-free package for ACL. It can handle hundreds of roles easily.",
   "main": "lib/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "build": "rimraf ./lib && tsc",
     "test": "jest",
