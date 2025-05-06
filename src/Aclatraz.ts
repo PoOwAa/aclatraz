@@ -163,7 +163,7 @@ export class Aclatraz {
     for (const chunk of chunks) {
       aclNumber =
         (aclNumber << BigInt(this.options.chunkSize)) |
-        BigInt(BigInt(`0x${chunk}`));
+        BigInt(`0x${chunk}`);
     }
 
     return aclNumber
