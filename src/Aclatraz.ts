@@ -16,7 +16,11 @@ export class Aclatraz {
   protected options: AclConfig;
 
   constructor(aclRules: AclRule[] = [], options: Partial<AclConfig> = {}) {
-    this.options = Object.assign(this.defaultConfig, options);
+    const mergedOptions = Object.assign({}, this.defaultConfig, options);
+    if (mergedOptions.chunkSize > 128) {
+      throw new Error('chunkSize too large: must be <= 128');
+    }
+    this.options = mergedOptions;
     this.rules = aclRules;
   }
 
@@ -48,7 +52,16 @@ export class Aclatraz {
   }
 
   public setOptions(aclConfig: Partial<AclConfig>): void {
-    this.options = Object.assign(this.defaultConfig, this.options, aclConfig);
+    const mergedOptions = Object.assign(
+      {},
+      this.defaultConfig,
+      this.options,
+      aclConfig
+    );
+    if (mergedOptions.chunkSize > 128) {
+      throw new Error('chunkSize too large: must be <= 128');
+    }
+    this.options = mergedOptions;
   }
 
   public getRules(): AclRule[] {
@@ -162,8 +175,7 @@ export class Aclatraz {
 
     for (const chunk of chunks) {
       aclNumber =
-        (aclNumber << BigInt(this.options.chunkSize)) |
-        BigInt(`0x${chunk}`);
+        (aclNumber << BigInt(this.options.chunkSize)) | BigInt(`0x${chunk}`);
     }
 
     return aclNumber
