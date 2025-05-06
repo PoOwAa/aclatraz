@@ -85,16 +85,8 @@ export class Aclatraz {
     currentPermission: string,
     ruleList: number[]
   ): string {
-    const decoded: string = this.decode(currentPermission);
-    const maxAclIndex: number = this.getMaxAclId();
-    const reversed = decoded
-      .split('')
-      .reverse()
-      .map((c: string) => +c);
-
-    let binary: number[] = new Array(maxAclIndex).fill(0);
-
-    reversed.forEach((c: number, index: number) => (binary[index] = c));
+    let aclNumber = BigInt(`0b${this.decode(currentPermission)}`);
+    const maxAclIndex = this.getMaxAclId();
 
     for (const ruleId of ruleList) {
       if (ruleId > maxAclIndex) {
@@ -105,20 +97,18 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      binary[ruleId - 1] = ACL_PERMISSION_GRANTED;
+
+      aclNumber |= 1n << BigInt(ruleId - 1);
     }
-    return this.encode(binary.reverse().join(''), this.options.chunkSize);
+
+    return this.encode(aclNumber.toString(2), this.options.chunkSize);
   }
 
   public revokePermission(
     currentPermission: string,
     ruleList: number[]
   ): string {
-    const decoded = this.decode(currentPermission);
-    const reversed = decoded
-      .split('')
-      .reverse()
-      .map((c: string) => +c);
+    let aclNumber = BigInt(`0b${this.decode(currentPermission)}`);
 
     for (const ruleId of ruleList) {
       if (ruleId > this.getMaxAclId()) {
@@ -129,9 +119,11 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      reversed[ruleId - 1] = ACL_PERMISSION_DENIED;
+
+      aclNumber &= ~(1n << BigInt(ruleId - 1));
     }
-    return this.encode(reversed.reverse().join(''), this.options.chunkSize);
+
+    return this.encode(aclNumber.toString(2), this.options.chunkSize);
   }
 
   /**
@@ -140,37 +132,46 @@ export class Aclatraz {
    * separator
    */
   protected encode(aclBinary: string, chunkSize: number): string {
-    const aclArr = aclBinary.split('').map((b) => +b);
-
+    const aclNumber = BigInt(`0b${aclBinary || '0'}`);
+    if (aclNumber === 0n) {
+      // Return a single chunk of zeros with the correct padding
+      return '0'.repeat(this.options.padding);
+    }
     const chunks: string[] = [];
-    while (aclArr.length) {
-      const chunk = aclArr.splice(chunkSize * -1).join('');
+    let mask = (1n << BigInt(chunkSize)) - 1n;
+    let current = aclNumber;
+    while (current > 0n) {
+      const chunk = current & mask;
       chunks.push(
-        parseInt(chunk, 2)
+        chunk
           .toString(this.options.encoding)
           .padStart(this.options.padding, this.options.paddingChar)
       );
+      current >>= BigInt(chunkSize);
     }
-
     return chunks.reverse().join('-');
   }
 
   protected decode(permission: string): string {
-    if (!permission && permission.length < 1) {
-      return parseInt('0', this.options.encoding)
-        .toString(2)
-        .padStart(this.options.padding, this.options.paddingChar);
+    if (!permission || permission.length < 1) {
+      return '0'.padStart(this.options.padding, this.options.paddingChar);
     }
+
     const chunks = permission.split('-');
+    let aclNumber = 0n;
 
-    let res = '';
     for (const chunk of chunks) {
-      res += parseInt(chunk, this.options.encoding)
-        .toString(2)
-        .padStart(this.options.chunkSize, this.options.paddingChar);
+      aclNumber =
+        (aclNumber << BigInt(this.options.chunkSize)) |
+        BigInt(BigInt(`0x${chunk}`));
     }
 
-    return res;
+    return aclNumber
+      .toString(2)
+      .padStart(
+        this.options.chunkSize * chunks.length,
+        this.options.paddingChar
+      );
   }
 
   protected getMaxAclId(): number {
