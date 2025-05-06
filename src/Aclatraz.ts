@@ -174,8 +174,11 @@ export class Aclatraz {
     let aclNumber = 0n;
 
     for (const chunk of chunks) {
-      aclNumber =
-        (aclNumber << BigInt(this.options.chunkSize)) | BigInt(`0x${chunk}`);
+      const chunkValue =
+        this.options.encoding === 16
+          ? BigInt(`0x${chunk}`)
+          : BigInt(parseInt(chunk, this.options.encoding));
+      aclNumber = (aclNumber << BigInt(this.options.chunkSize)) | chunkValue;
     }
 
     return aclNumber
