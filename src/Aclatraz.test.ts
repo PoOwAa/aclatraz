@@ -238,3 +238,20 @@ describe('Aclatraz method tests', () => {
     expect(testAcl.verify(permission, 999)).toBe(false);
   });
 });
+
+describe('Aclatraz edge case and coverage tests', () => {
+  test('constructor throws on too large chunkSize', () => {
+    expect(() => new Aclatraz([], { chunkSize: 129 })).toThrow(
+      'chunkSize too large: must be <= 128'
+    );
+  });
+
+  test('decode supports non-hex encoding', () => {
+    const acl = new Aclatraz([{ id: 1, slug: 'test' }], { encoding: 8 });
+    // encoding: 8, so permission string is in octal
+    // 1 in binary is '1', in octal is '1'
+    const permission = acl.grantPermission('', [1]);
+    // Should decode correctly
+    expect(acl.verify(permission, 1)).toBe(true);
+  });
+});
