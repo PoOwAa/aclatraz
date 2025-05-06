@@ -98,7 +98,7 @@ export class Aclatraz {
     currentPermission: string,
     ruleList: number[]
   ): string {
-    let aclNumber = BigInt(`0b${this.decode(currentPermission)}`);
+    let aclNumber = this.decodeToBigInt(currentPermission);
     const maxAclIndex = this.getMaxAclId();
 
     for (const ruleId of ruleList) {
@@ -114,14 +114,14 @@ export class Aclatraz {
       aclNumber |= 1n << BigInt(ruleId - 1);
     }
 
-    return this.encode(aclNumber.toString(2), this.options.chunkSize);
+    return this.encodeFromBigInt(aclNumber);
   }
 
   public revokePermission(
     currentPermission: string,
     ruleList: number[]
   ): string {
-    let aclNumber = BigInt(`0b${this.decode(currentPermission)}`);
+    let aclNumber = this.decodeToBigInt(currentPermission);
 
     for (const ruleId of ruleList) {
       if (ruleId > this.getMaxAclId()) {
@@ -136,7 +136,7 @@ export class Aclatraz {
       aclNumber &= ~(1n << BigInt(ruleId - 1));
     }
 
-    return this.encode(aclNumber.toString(2), this.options.chunkSize);
+    return this.encodeFromBigInt(aclNumber);
   }
 
   /**
@@ -147,8 +147,7 @@ export class Aclatraz {
   protected encode(aclBinary: string, chunkSize: number): string {
     const aclNumber = BigInt(`0b${aclBinary || '0'}`);
     if (aclNumber === 0n) {
-      // Return a single chunk of zeros with the correct padding
-      return '0'.repeat(this.options.padding);
+      return '0'.repeat(this.options.padding).toUpperCase();
     }
     const chunks: string[] = [];
     let mask = (1n << BigInt(chunkSize)) - 1n;
@@ -158,6 +157,7 @@ export class Aclatraz {
       chunks.push(
         chunk
           .toString(this.options.encoding)
+          .toUpperCase()
           .padStart(this.options.padding, this.options.paddingChar)
       );
       current >>= BigInt(chunkSize);
@@ -198,5 +198,44 @@ export class Aclatraz {
     }
 
     return max;
+  }
+
+  protected decodeToBigInt(permission: string): bigint {
+    if (!permission || permission.length < 1) {
+      return BigInt(0);
+    }
+
+    const chunks = permission.split('-');
+    let aclNumber = BigInt(0);
+
+    for (const chunk of chunks) {
+      const chunkValue =
+        this.options.encoding === 16
+          ? BigInt(`0x${chunk}`)
+          : BigInt(parseInt(chunk, this.options.encoding));
+      aclNumber = (aclNumber << BigInt(this.options.chunkSize)) | chunkValue;
+    }
+
+    return aclNumber;
+  }
+
+  protected encodeFromBigInt(aclNumber: bigint): string {
+    if (aclNumber === BigInt(0)) {
+      return '0'.repeat(this.options.padding).toUpperCase();
+    }
+    const chunks: string[] = [];
+    let mask = (1n << BigInt(this.options.chunkSize)) - 1n;
+    let current = aclNumber;
+    while (current > 0n) {
+      const chunk = current & mask;
+      chunks.push(
+        chunk
+          .toString(this.options.encoding)
+          .toUpperCase()
+          .padStart(this.options.padding, this.options.paddingChar)
+      );
+      current >>= BigInt(this.options.chunkSize);
+    }
+    return chunks.reverse().join('-');
   }
 }

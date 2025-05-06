@@ -7,6 +7,7 @@ export default async (): Promise<Config.InitialOptions> => {
     testEnvironment: 'node',
     coverageDirectory: './coverage/',
     collectCoverage: true,
+    testPathIgnorePatterns: ['<rootDir>/src/Aclatraz.performance.test.ts'],
     coverageThreshold: {
       global: {
         branches: 100,
