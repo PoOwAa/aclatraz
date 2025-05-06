@@ -16,7 +16,11 @@ export class Aclatraz {
   protected options: AclConfig;
 
   constructor(aclRules: AclRule[] = [], options: Partial<AclConfig> = {}) {
-    this.options = Object.assign(this.defaultConfig, options);
+    const mergedOptions = Object.assign({}, this.defaultConfig, options);
+    if (mergedOptions.chunkSize > 128) {
+      throw new Error('chunkSize too large: must be <= 128');
+    }
+    this.options = mergedOptions;
     this.rules = aclRules;
   }
 
@@ -48,7 +52,16 @@ export class Aclatraz {
   }
 
   public setOptions(aclConfig: Partial<AclConfig>): void {
-    this.options = Object.assign(this.defaultConfig, this.options, aclConfig);
+    const mergedOptions = Object.assign(
+      {},
+      this.defaultConfig,
+      this.options,
+      aclConfig
+    );
+    if (mergedOptions.chunkSize > 128) {
+      throw new Error('chunkSize too large: must be <= 128');
+    }
+    this.options = mergedOptions;
   }
 
   public getRules(): AclRule[] {
@@ -85,16 +98,8 @@ export class Aclatraz {
     currentPermission: string,
     ruleList: number[]
   ): string {
-    const decoded: string = this.decode(currentPermission);
-    const maxAclIndex: number = this.getMaxAclId();
-    const reversed = decoded
-      .split('')
-      .reverse()
-      .map((c: string) => +c);
-
-    let binary: number[] = new Array(maxAclIndex).fill(0);
-
-    reversed.forEach((c: number, index: number) => (binary[index] = c));
+    let aclNumber = this.decodeToBigInt(currentPermission);
+    const maxAclIndex = this.getMaxAclId();
 
     for (const ruleId of ruleList) {
       if (ruleId > maxAclIndex) {
@@ -105,20 +110,18 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      binary[ruleId - 1] = ACL_PERMISSION_GRANTED;
+
+      aclNumber |= 1n << BigInt(ruleId - 1);
     }
-    return this.encode(binary.reverse().join(''), this.options.chunkSize);
+
+    return this.encodeFromBigInt(aclNumber);
   }
 
   public revokePermission(
     currentPermission: string,
     ruleList: number[]
   ): string {
-    const decoded = this.decode(currentPermission);
-    const reversed = decoded
-      .split('')
-      .reverse()
-      .map((c: string) => +c);
+    let aclNumber = this.decodeToBigInt(currentPermission);
 
     for (const ruleId of ruleList) {
       if (ruleId > this.getMaxAclId()) {
@@ -129,9 +132,11 @@ export class Aclatraz {
       if (index < 0) {
         continue;
       }
-      reversed[ruleId - 1] = ACL_PERMISSION_DENIED;
+
+      aclNumber &= ~(1n << BigInt(ruleId - 1));
     }
-    return this.encode(reversed.reverse().join(''), this.options.chunkSize);
+
+    return this.encodeFromBigInt(aclNumber);
   }
 
   /**
@@ -140,37 +145,48 @@ export class Aclatraz {
    * separator
    */
   protected encode(aclBinary: string, chunkSize: number): string {
-    const aclArr = aclBinary.split('').map((b) => +b);
-
+    const aclNumber = BigInt(`0b${aclBinary || '0'}`);
+    if (aclNumber === 0n) {
+      return '0'.repeat(this.options.padding).toUpperCase();
+    }
     const chunks: string[] = [];
-    while (aclArr.length) {
-      const chunk = aclArr.splice(chunkSize * -1).join('');
+    let mask = (1n << BigInt(chunkSize)) - 1n;
+    let current = aclNumber;
+    while (current > 0n) {
+      const chunk = current & mask;
       chunks.push(
-        parseInt(chunk, 2)
+        chunk
           .toString(this.options.encoding)
+          .toUpperCase()
           .padStart(this.options.padding, this.options.paddingChar)
       );
+      current >>= BigInt(chunkSize);
     }
-
     return chunks.reverse().join('-');
   }
 
   protected decode(permission: string): string {
-    if (!permission && permission.length < 1) {
-      return parseInt('0', this.options.encoding)
-        .toString(2)
-        .padStart(this.options.padding, this.options.paddingChar);
+    if (!permission || permission.length < 1) {
+      return '0'.padStart(this.options.padding, this.options.paddingChar);
     }
+
     const chunks = permission.split('-');
+    let aclNumber = 0n;
 
-    let res = '';
     for (const chunk of chunks) {
-      res += parseInt(chunk, this.options.encoding)
-        .toString(2)
-        .padStart(this.options.chunkSize, this.options.paddingChar);
+      const chunkValue =
+        this.options.encoding === 16
+          ? BigInt(`0x${chunk}`)
+          : BigInt(parseInt(chunk, this.options.encoding));
+      aclNumber = (aclNumber << BigInt(this.options.chunkSize)) | chunkValue;
     }
 
-    return res;
+    return aclNumber
+      .toString(2)
+      .padStart(
+        this.options.chunkSize * chunks.length,
+        this.options.paddingChar
+      );
   }
 
   protected getMaxAclId(): number {
@@ -182,5 +198,44 @@ export class Aclatraz {
     }
 
     return max;
+  }
+
+  protected decodeToBigInt(permission: string): bigint {
+    if (!permission || permission.length < 1) {
+      return BigInt(0);
+    }
+
+    const chunks = permission.split('-');
+    let aclNumber = BigInt(0);
+
+    for (const chunk of chunks) {
+      const chunkValue =
+        this.options.encoding === 16
+          ? BigInt(`0x${chunk}`)
+          : BigInt(parseInt(chunk, this.options.encoding));
+      aclNumber = (aclNumber << BigInt(this.options.chunkSize)) | chunkValue;
+    }
+
+    return aclNumber;
+  }
+
+  protected encodeFromBigInt(aclNumber: bigint): string {
+    if (aclNumber === BigInt(0)) {
+      return '0'.repeat(this.options.padding).toUpperCase();
+    }
+    const chunks: string[] = [];
+    let mask = (1n << BigInt(this.options.chunkSize)) - 1n;
+    let current = aclNumber;
+    while (current > 0n) {
+      const chunk = current & mask;
+      chunks.push(
+        chunk
+          .toString(this.options.encoding)
+          .toUpperCase()
+          .padStart(this.options.padding, this.options.paddingChar)
+      );
+      current >>= BigInt(this.options.chunkSize);
+    }
+    return chunks.reverse().join('-');
   }
 }
